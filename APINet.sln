@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36401.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APINet", "APINet\APINet.csproj", "{42F1D979-CE7F-45CE-BD5B-0E7608955F1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Test\Tests.csproj", "{C4D8763E-45A7-4538-A3CE-30951F56F505}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{42F1D979-CE7F-45CE-BD5B-0E7608955F1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42F1D979-CE7F-45CE-BD5B-0E7608955F1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42F1D979-CE7F-45CE-BD5B-0E7608955F1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42F1D979-CE7F-45CE-BD5B-0E7608955F1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4D8763E-45A7-4538-A3CE-30951F56F505}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4D8763E-45A7-4538-A3CE-30951F56F505}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4D8763E-45A7-4538-A3CE-30951F56F505}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4D8763E-45A7-4538-A3CE-30951F56F505}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {04EBBC6E-E059-44B5-A7DC-724145A4B95C}
+	EndGlobalSection
+EndGlobal
