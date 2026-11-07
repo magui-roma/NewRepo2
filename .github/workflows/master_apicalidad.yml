@@ -1,7 +1,7 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+# Docs for the Azure Web Apps Deploy action: https://github.com
+# More GitHub Actions for Azure: https://github.com
 
-name: Build and deploy ASP.Net Core app to Azure Web App - apicalidad
+name: Build, Test and Deploy ASP.Net Core app to Azure Web App - api-calidad
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read # Requerido para actions/checkout
 
     steps:
       - uses: actions/checkout@v4
@@ -23,9 +23,21 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      # Paso 1: Restaurar las dependencias/paquetes NuGet del proyecto
+      - name: Restore dependencies
+        run: dotnet restore
 
+      # Paso 2: Compilar el proyecto en modo Release
+      - name: Build with dotnet
+        run: dotnet build --configuration Release --no-restore
+
+      # =========================================================================
+      # 🚀 INYECCIÓN DE CALIDAD: EJECUCIÓN DE PRUEBAS UNITARIAS (Lo que faltaba)
+      # =========================================================================
+      - name: Execute Unit Tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      # Paso 3: Publicar los binarios de la API listos para el servidor IIS
       - name: dotnet publish
         run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
@@ -39,8 +51,8 @@ jobs:
     runs-on: windows-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write # Requerido para solicitar el JWT
+      contents: read # Requerido para actions/checkout
 
     steps:
       - name: Download artifact from build job
@@ -61,5 +73,4 @@ jobs:
         with:
           app-name: 'apicalidad'
           slot-name: 'Production'
-          package: .
-          
+          package: .net-app
