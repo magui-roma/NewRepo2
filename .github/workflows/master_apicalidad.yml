@@ -1,4 +1,4 @@
-```yaml
+
 name: Build, Test and Deploy ASP.Net Core app to Azure Web App - apicalidad
 
 on:
@@ -9,9 +9,6 @@ on:
 
 jobs:
 
-  # ==========================================
-  # 1. BUILD: RESTAURAR, COMPILAR Y PUBLICAR
-  # ==========================================
   build:
     runs-on: windows-latest
 
@@ -42,10 +39,6 @@ jobs:
           name: api-publish
           path: ./publish
 
-
-  # ==========================================
-  # 2. TEST: PRUEBAS UNITARIAS Y COBERTURA
-  # ==========================================
   test:
     runs-on: windows-latest
 
@@ -90,10 +83,6 @@ jobs:
           path: ./TestResults/CoverageReport
           if-no-files-found: ignore
 
-
-  # ==========================================
-  # 3. DEPLOY: PUBLICAR API EN AZURE
-  # ==========================================
   deploy:
     runs-on: windows-latest
 
@@ -123,4 +112,3 @@ jobs:
           app-name: 'apicalidad'
           slot-name: 'Production'
           package: ./publish
-```
