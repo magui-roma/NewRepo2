@@ -1,66 +1,115 @@
-# MAGUI
-# Docs for the Azure Web Apps Deploy action: https://github.com
-# More GitHub Actions for Azure: https://github.com
-
-name: Build, Test and Deploy ASP.Net Core app to Azure Web App - api-calidad
+```yaml
+name: Build, Test and Deploy ASP.Net Core app to Azure Web App - apicalidad
 
 on:
   push:
     branches:
-      - 'master'
+      - master
   workflow_dispatch:
 
 jobs:
+
+  # ==========================================
+  # 1. BUILD: RESTAURAR, COMPILAR Y PUBLICAR
+  # ==========================================
   build:
     runs-on: windows-latest
+
     permissions:
-      contents: read # Requerido para actions/checkout
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
 
-      # Paso 1: Restaurar las dependencias/paquetes NuGet del proyecto
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Restore API dependencies
+        run: dotnet restore ./APINet/APINet.csproj
 
-      # Paso 2: Compilar el proyecto en modo Release
-      - name: Build with dotnet
-        run: dotnet build --configuration Release --no-restore
+      - name: Build API
+        run: dotnet build ./APINet/APINet.csproj --configuration Release --no-restore
 
-      # =========================================================================
-      # 🚀 INYECCIÓN DE CALIDAD: EJECUCIÓN DE PRUEBAS UNITARIAS (Lo que faltaba)
-      # =========================================================================
-      - name: Execute Unit Tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
+      - name: Publish API
+        run: dotnet publish ./APINet/APINet.csproj --configuration Release --no-build --output ./publish
 
-      # Paso 3: Publicar los binarios de la API listos para el servidor IIS
-      - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
-
-      - name: Upload artifact for deployment job
+      - name: Upload publish artifact
         uses: actions/upload-artifact@v4
         with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          name: api-publish
+          path: ./publish
 
-  deploy:
+
+  # ==========================================
+  # 2. TEST: PRUEBAS UNITARIAS Y COBERTURA
+  # ==========================================
+  test:
     runs-on: windows-latest
-    needs: build
+
     permissions:
-      id-token: write # Requerido para solicitar el JWT
-      contents: read # Requerido para actions/checkout
+      contents: read
 
     steps:
-      - name: Download artifact from build job
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Restore test dependencies
+        run: dotnet restore ./Test/Tests.csproj
+
+      - name: Run tests with coverage
+        run: dotnet test ./Test/Tests.csproj --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults --logger "trx;LogFileName=test_results.trx"
+
+      - name: Generate coverage report
+        if: success()
+        run: reportgenerator "-reports:./TestResults/**/coverage.cobertura.xml" "-targetdir:./TestResults/CoverageReport" "-reporttypes:Html"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ./TestResults/**/*.trx
+          if-no-files-found: ignore
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ./TestResults/CoverageReport
+          if-no-files-found: ignore
+
+
+  # ==========================================
+  # 3. DEPLOY: PUBLICAR API EN AZURE
+  # ==========================================
+  deploy:
+    runs-on: windows-latest
+
+    needs: [build, test]
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download publish artifact
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
-      
+          name: api-publish
+          path: ./publish
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -69,9 +118,9 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_5B9BCD9A51344B5D970AA385FCA7A5BD }}
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'apicalidad'
           slot-name: 'Production'
-          package: .net-app
+          package: ./publish
+```
